@@ -22,5 +22,5 @@ func SetupPostgreSQL() {
 
 	logrus.Info("Successfully connect to database..")
 
-	DB.AutoMigrate(&models.PaymentTransaction{}, &models.PaymentMethod{})
+	DB.AutoMigrate(&models.PaymentTransaction{}, &models.PaymentMethod{}, &models.PaymentRefund{})
 }

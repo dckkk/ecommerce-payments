@@ -7,6 +7,7 @@ import (
 )
 
 type PaymentInitiatePayload struct {
+	UserID     int     `json:"user_id"`
 	OrderID    int     `json:"order_id"`
 	TotalPrice float64 `json:"total_price"`
 }
@@ -18,6 +19,7 @@ type RefundPayload struct {
 
 type PaymentTransaction struct {
 	ID               int       `json:"id"`
+	UserID           int       `json:"user_id"`
 	OrderID          int       `json:"order_id" validate:"required"`
 	TotalPrice       float64   `json:"total_price" gorm:"column:total_price;type:decimal(10,2)" validate:"required"`
 	PaymentMethodID  int       `json:"payment_method_id"`
@@ -29,6 +31,20 @@ type PaymentTransaction struct {
 
 func (*PaymentTransaction) TableName() string {
 	return "payment_transactions"
+}
+
+type PaymentRefund struct {
+	ID               int       `json:"id"`
+	AdminID          int       `json:"admin_id"`
+	OrderID          int       `json:"order_id" validate:"required"`
+	Status           string    `json:"status" gorm:"column:status;type:varchar(10)"`
+	PaymentReference string    `json:"payment_reference" gorm:"column:payment_reference;type:varchar(100)"`
+	CreatedAt        time.Time `json:"-"`
+	UpdatedAt        time.Time `json:"-"`
+}
+
+func (*PaymentRefund) TableName() string {
+	return "payment_refunds"
 }
 
 func (l PaymentTransaction) Validate() error {

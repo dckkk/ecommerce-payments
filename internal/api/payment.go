@@ -1,14 +1,17 @@
 package api
 
 import (
+	"context"
 	"ecommerce_payments/constants"
 	"ecommerce_payments/external"
 	"ecommerce_payments/helpers"
 	"ecommerce_payments/internal/interfaces"
 	"ecommerce_payments/internal/models"
+	"encoding/json"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 )
 
 type PaymentAPI struct {
@@ -99,4 +102,22 @@ func (api *PaymentAPI) PaymentMethodUnlink(e echo.Context) error {
 		return helpers.SendResponseHTTP(e, http.StatusInternalServerError, constants.ErrServerError, nil)
 	}
 	return helpers.SendResponseHTTP(e, http.StatusOK, constants.SuccessMessage, nil)
+}
+
+func (api *PaymentAPI) InitiatePayment(kafkaPayload []byte) error {
+	req := models.PaymentInitiatePayload{}
+	if err := json.Unmarshal(kafkaPayload, &req); err != nil {
+		return errors.Wrap(err, "failed to read kafka payload: ")
+	}
+
+	return api.PaymentService.InitiatePayment(context.Background(), req)
+}
+
+func (api *PaymentAPI) RefundPayment(kafkaPayload []byte) error {
+	req := models.RefundPayload{}
+	if err := json.Unmarshal(kafkaPayload, &req); err != nil {
+		return errors.Wrap(err, "failed to read kafka payload: ")
+	}
+
+	return api.PaymentService.RefundPayment(context.Background(), req)
 }
